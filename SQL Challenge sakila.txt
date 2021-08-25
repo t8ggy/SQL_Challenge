@@ -1,0 +1,102 @@
+
+--Install Databases
+SOURCE C:\Users\Iain\Desktop\dbs\world.sql
+SOURCE C:\Users\Iain\Desktop\dbs\sakila.sql
+SOURCE C:\Users\Iain\Desktop\dbs\movielens.sql
+
+--Check Databases installed correctly
+SHOW TABLES FROM world;
+SHOW TABLES FROM sakila;
+SHOW TABLES FROM movielens;
+
+use sakila;
+
+--1. List All actors
+SELECT first_name, last_name from actor;
+
+--2. Find the surname of the actor with the forename 'John'.
+SELECT last_name FROM actor WHERE first_name='John';
+
+--3. . Find all actors with surname 'Neeson'.
+SELECT first_name, last_name from actor WHERE last_name='Neeson';
+
+--4. Find all actors with ID numbers divisible by 10.
+SELECT first_name, last_name FROM actor WHERE actor_id % 10 = 0;
+
+--5. What is the description of the movie with an ID of 100?
+SELECT description FROM film WHERE film_id=100;
+
+--6 Find every R-rated movie.
+SELECT title FROM film WHERE rating='R';
+
+--7. Find every non-R-rated movie.
+SELECT title FROM film WHERE rating!='R';
+
+--8. Find the ten shortest movies.
+SELECT title, length FROM film ORDER by length ASC LIMIT 10;
+
+--9. Find the movies with the longest runtime, without using LIMIT .
+SELECT title FROM film WHERE length = (SELECT MAX(length) FROM film);
+ 
+--10.  Find all movies that have deleted scenes.
+SELECT title FROM film WHERE special_features LIKE '%deleted scenes%';
+
+--11.  Using HAVING , reverse-alphabetically list the last names that are not repeated.
+SELECT DISTINCT last_name from actor HAVING last_name IS NOT NULL ORDER by last_name desc;
+
+--12. Using HAVING , list the last names that appear more than once, from highest to lowest frequency.
+SELECT last_name, COUNT(last_name) FROM actor GROUP BY last_name HAVING COUNT(last_name) > 1 ORDER by COUNT(last_name) DESC;
+
+--13. Which actor has appeared in the most films?
+SELECT first_name, last_name FROM actor WHERE actor_id = (SELECT actor_id from film_actor  ORDER BY COUNT(actor_id) DESC LIMIT 1);
+
+--Group Answer - need to understand what this all means
+SELECT film_actor.actor_id, actor_info.first_name, actor_info.last_name, COUNT(film_actor.actor_id) AS films FROM film_actor JOIN actor_info ON film_actor.actor_id = actor_info.actor_id GROUP BY film_actor.actor_id ORDER BY COUNT(film_actor.actor_id) DESC LIMIT 1;
+
+--14. When is 'Academy Dinosaur' due?
+SELECT release_year FROM film WHERE title='Academy Dinosaur';
+
+--15. What is the average runtime of all films?
+SELECT AVG(length) from film;
+
+--16. List the average runtime for every film category.
+SELECT category, AVG(length) FROM film_list GROUP BY category;
+
+--17. List all movies featuring a robot.
+ SELECT COUNT(description) FROM film WHERE description LIKE '%robot%';
+ 
+ --18. How many movies were released in 2010?
+SELECT COUNT(release_year) FROM film WHERE release_year='2010';
+
+--Answer = 0
+--Confirmed by grouping by year and seeing all films released in 2006
+SELECT release_year, COUNT(release_year) FROM film GROUP BY release_year;
+
+--19. Find the titles of all the horror movies.
+ 
+SELECT title from film WHERE film_id IN
+(SELECT film_id from film_category WHERE category_id IN
+(SELECT category_id FROM category WHERE name='Horror'));
+
+--20. List the full name of the staff member with the ID of 2.
+SELECT first_name, last_name FROM staff WHERE staff_id='2';
+
+--21. List all the movies that Fred Costner has appeared in.
+
+SELECT title from film WHERE film_id IN
+(SELECT film_id from film_actor WHERE actor_id=
+(SELECT actor_id FROM actor WHERE first_name='Fred' AND last_name='Costner'));
+
+--22. How many distinct countries are there?
+SELECT COUNT(country) FROM country;
+
+--23. List the name of every language in reverse-alphabetical order.
+SELECT name FROM language ORDER BY name DESC;
+
+--24.  List the full names of every actor whose surname ends with '-son' in alphabetical order by their forename.
+SELECT first_name, last_name FROM actor WHERE last_name LIKE'%son' ORDER BY first_name ASC;
+
+--25. Which category contains the most films?
+SELECT name FROM category where category_id =
+(SELECT category_id FROM film_category GROUP BY category_id ORDER BY COUNT(category_id) DESC LIMIT 1);
+

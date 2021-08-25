@@ -1,0 +1,36 @@
+--1.  List the titles and release dates of movies released between 1983-1993 in reverse chronological order.
+SELECT title, release_date FROM movies WHERE release_date BETWEEN '1983-01-01' AND '1993-12-31' ORDER BY release_date DESC;
+
+--2.  Without using LIMIT , list the titles of the movies with the lowest average rating.
+SELECT movies.title, ratings.rating FROM movies
+JOIN ratings ON movies.id=ratings.id
+WHERE ratings.rating < '2'
+ORDER BY ratings.rating ASC;
+
+--3.  List the unique records for Sci-Fi movies where male 24-year-old students have given 5-star ratings.
+--This is the answer by Disuqi - it makes sense when seeing it done
+--but I struggled to get the arguments in the correct order
+
+SELECT DISTINCT *  FROM movies 
+JOIN genres_movies ON movies.id = genres_movies.movie_id
+JOIN ratings ON movies.id = ratings.movie_id
+WHERE genres_movies.genre_id = (SELECT id FROM genres WHERE name = 'Sci-Fi')
+AND ratings.user_id IN (
+SELECT id FROM users WHERE gender = 'M' AND age = '24' AND occupation_id =(
+SELECT id FROM occupations WHERE name = 'Student'))
+AND ratings.rating = '5';
+
+--4. List the unique titles of each of the movies released on the most popular release day.
+--Logic let me down. Took a long time to break it down in to 2 stages.
+
+SELECT DISTINCT title FROM movies where release_date = 
+(SELECT release_date FROM MOVIES 
+GROUP BY release_date 
+ORDER BY COUNT(release_date) DESC LIMIT 1;)
+
+--5.  Find the total number of movies in each genre; list the results in ascending numeric order.
+--Renamed column headings using AS (Credit to Disuqi again)
+SELECT genres.name AS Genres, COUNT(genres_movies.movie_id) AS Total FROM genres
+JOIN genres_movies ON genres.id=genres_movies.genre_id
+GROUP BY genres_movies.genre_id
+ORDER BY COUNT(genres.name) ASC;
